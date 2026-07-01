@@ -1,6 +1,6 @@
 # p2c-sniper
 
-[![CI](https://github.com/North-web-dev/p2c-sniper/actions/workflows/ci.yml/badge.svg)](https://github.com/North-web-dev/p2c-sniper/actions/workflows/ci.yml) [![Go Report Card](https://goreportcard.com/badge/github.com/North-web-dev/p2c-sniper)](https://goreportcard.com/report/github.com/North-web-dev/p2c-sniper) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) [![Release](https://img.shields.io/github/v/release/North-web-dev/p2c-sniper?sort=semver)](https://github.com/North-web-dev/p2c-sniper/releases)
+[![CI](https://github.com/North-web-dev/p2c-sniper/actions/workflows/ci.yml/badge.svg)](https://github.com/North-web-dev/p2c-sniper/actions/workflows/ci.yml) [![Go Report Card](https://goreportcard.com/badge/github.com/North-web-dev/p2c-sniper)](https://goreportcard.com/report/github.com/North-web-dev/p2c-sniper) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) [![Release](https://img.shields.io/github/v/release/North-web-dev/p2c-sniper?display_name=tag&sort=semver)](https://github.com/North-web-dev/p2c-sniper/releases)
 
 
 A latency-focused order sniper for the CryptoBot P2C section (`app.cr.bot` /
