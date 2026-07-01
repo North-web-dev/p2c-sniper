@@ -70,9 +70,25 @@ Nice=-10
 WantedBy=multi-user.target
 ```
 
+Set `insecure_tls: true` only when running behind a TLS-terminating (MITM) proxy.
+Set `P2C_DEBUG=1` to log every order seen on the feed (noisy; off by default).
+
 ## Telegram controls
 
 When a token takes an order the bot posts a notification with inline buttons —
 **Complete / Cancel / Dispute / Refund** — which run the corresponding
 `/p2c/payments/{id}/{action}` call through the same token that took the order.
 Only the configured `telegram_chat_id` is allowed to use them.
+
+## Operations
+
+Order distribution is FIFO and coverage scales with the number of tokens, not with
+socket age — see [TOKENS.md](TOKENS.md) for the holding strategy.
+
+`scripts/token-watch.sh` tails the sniper's log and writes a per-token CSV
+(uptime, reconnects, seen, rate) so you can watch socket health over time:
+
+```sh
+./p2c-sniper config.json > /var/log/p2c.log 2>&1 &
+scripts/token-watch.sh /var/log/p2c.log token-aging.csv 120
+```

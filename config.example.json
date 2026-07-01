@@ -8,6 +8,7 @@
   "reconnect_max_ms": 250,
   "telegram_bot_token": "",
   "telegram_chat_id": 0,
+  "insecure_tls": false,
   "accounts": [
     {
       "label": "acc1",

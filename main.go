@@ -15,6 +15,7 @@ import (
 	"io"
 	"math"
 	"math/big"
+	"math/rand"
 	"net/http"
 	"net/url"
 	"os"
@@ -47,6 +48,7 @@ type Config struct {
 	ReconnectMaxMs    int       `json:"reconnect_max_ms"`
 	TelegramBotToken  string    `json:"telegram_bot_token"`
 	TelegramChatID    int64     `json:"telegram_chat_id"`
+	InsecureTLS       bool      `json:"insecure_tls"` // skip cert verification (needed behind a MITM proxy)
 	Accounts          []Account `json:"accounts"`
 }
 
@@ -81,6 +83,9 @@ func loadConfig(path string) (*Config, error) {
 }
 
 var wei = new(big.Float).SetFloat64(1e18)
+
+// debugLog gates the per-order "seen" line, which is noisy at feed scale.
+var debugLog = os.Getenv("P2C_DEBUG") != ""
 
 // weiToRUB converts an amount that may arrive as a wei-scaled (x1e18) string,
 // float, or json.Number into a plain RUB value.
@@ -139,10 +144,12 @@ func (n *notifier) sendMarkup(text string, markup any) {
 			bytes.NewReader(body))
 		req.Header.Set("Content-Type", "application/json")
 		resp, err := n.client.Do(req)
-		if err == nil {
-			io.Copy(io.Discard, resp.Body)
-			resp.Body.Close()
+		if err != nil {
+			logf("tg", "notify send failed: %v", err)
+			return
 		}
+		io.Copy(io.Discard, resp.Body)
+		resp.Body.Close()
 	}()
 }
 
@@ -180,7 +187,7 @@ type worker struct {
 
 func newWorker(cfg *Config, acc Account, n *notifier) (*worker, error) {
 	tr := &http.Transport{
-		TLSClientConfig:     &tls.Config{InsecureSkipVerify: true},
+		TLSClientConfig:     &tls.Config{InsecureSkipVerify: cfg.InsecureTLS},
 		ForceAttemptHTTP2:   true,
 		MaxIdleConns:        64,
 		MaxIdleConnsPerHost: 64,
@@ -188,7 +195,7 @@ func newWorker(cfg *Config, acc Account, n *notifier) (*worker, error) {
 		DisableCompression:  true,
 	}
 	wd := &websocket.Dialer{
-		TLSClientConfig:   &tls.Config{InsecureSkipVerify: true},
+		TLSClientConfig:   &tls.Config{InsecureSkipVerify: cfg.InsecureTLS},
 		HandshakeTimeout:  10 * time.Second,
 		EnableCompression: false,
 	}
@@ -462,12 +469,14 @@ func (w *worker) parseOrders(p []byte) {
 			rub = weiToRUB(d.OutAmount)
 		}
 		hit := rub >= w.cfg.MinRUB && rub <= w.cfg.MaxRUB
-		tag := ""
-		if hit {
-			tag = " TARGET"
+		if debugLog {
+			tag := ""
+			if hit {
+				tag = " TARGET"
+			}
+			logf(w.acc.Label, "seen %s | %.0fRUB | %s | mcc=%s boost=%d%s",
+				d.ID, rub, d.BrandName, d.MCC, d.Boost, tag)
 		}
-		logf(w.acc.Label, "seen %s | %.0fRUB | %s | mcc=%s boost=%d%s",
-			d.ID, rub, d.BrandName, d.MCC, d.Boost, tag)
 		if hit {
 			go w.takeOrder(orderInfo{id: d.ID, rub: rub, brand: d.BrandName, url: d.URL, payload: d.Payload})
 		}
@@ -524,7 +533,7 @@ func (w *worker) run(ctx context.Context) {
 			return
 		}
 		// Reconnect fast with a little jitter to reclaim queue position.
-		d := time.Duration(w.cfg.ReconnectMinMs+int(time.Now().UnixNano())%maxInt(span, 1)) * time.Millisecond
+		d := time.Duration(w.cfg.ReconnectMinMs+rand.Intn(maxInt(span, 1))) * time.Millisecond
 		logf(w.acc.Label, "reconnect in %v (%v)", d, err)
 		select {
 		case <-ctx.Done():
