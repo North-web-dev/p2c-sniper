@@ -92,3 +92,20 @@ socket age — see [TOKENS.md](TOKENS.md) for the holding strategy.
 ./p2c-sniper config.json > /var/log/p2c.log 2>&1 &
 scripts/token-watch.sh /var/log/p2c.log token-aging.csv 120
 ```
+
+## Disclaimer
+
+This project is published for **educational and research purposes** — to
+document a latency/queue-positioning approach to a real-time WebSocket order
+feed. It is provided **as is, without warranty of any kind**.
+
+Interacting with a third-party service through automation may violate that
+service's Terms of Service. **You are solely responsible** for how you use this
+code, for obtaining any required authorization, and for complying with all
+applicable laws and terms. The authors accept **no liability** for any use,
+misuse, damages, account actions, or losses arising from it. Use at your own
+risk.
+
+## License
+
+MIT — see [LICENSE](LICENSE).
