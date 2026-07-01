@@ -1,0 +1,19 @@
+{
+  "host": "app.cr.bot",
+  "min_rub": 0,
+  "max_rub": 1000000000,
+  "take_shots": 3,
+  "warmer_interval_sec": 5,
+  "reconnect_min_ms": 50,
+  "reconnect_max_ms": 250,
+  "telegram_bot_token": "",
+  "telegram_chat_id": 0,
+  "accounts": [
+    {
+      "label": "acc1",
+      "token": "PASTE_ACCESS_TOKEN_HERE",
+      "proxy": "http://user:pass@gate.nodemaven.com:8080",
+      "payment_method_id": ""
+    }
+  ]
+}

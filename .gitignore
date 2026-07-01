@@ -1,0 +1,8 @@
+# binaries
+p2c-sniper
+*_bin
+*.exe
+# local config with tokens
+config.json
+# go build cache
+/vendor/
